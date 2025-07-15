@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0"
+    />
+    <title>NotesFlow App</title>
+
+    <!-- External Resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Concert+One&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="index.css" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  </head>
+
+  <body>
+    <!-- ===================== NAVBAR ===================== -->
+    <div class="navbar">
+      <div class="navbar-title">
+        NotesFlow <i class="fas fa-notes-medical"></i>
+      </div>
+
+      <!-- Search Container (Initially Hidden) -->
+      <div class="search-container" id="searchContainer" style="display: none">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          id="searchBar"
+          autocomplete="off"
+          placeholder="Search notes by title..."
+        />
+
+        <!-- Date Picker Elements -->
+        <i class="fas fa-calendar-alt calendar-icon" id="calendarIcon"></i>
+        <i class="fas fa-times clear-date-filter" id="clearDateFilter"></i>
+        <input type="text" id="datePicker" style="display: none" />
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="navbar-buttons">
+        <button id="addBtn" style="display: none">
+          <i class="fas fa-plus"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggle" class="btn">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Profile Image -->
+        <input
+          type="file"
+          id="profileImageUpload"
+          accept="image/*"
+          style="display: none"
+        />
+        <div
+          id="admin-icon"
+          class="admin-icon"
+          onclick="document.getElementById('profileImageUpload').click()"
+        >
+          <img
+            src="images/admin_icon.png"
+            id="userProfileImage"
+            alt="Admin Profile Icon"
+          />
+        </div>
+
+        <!-- Auth Buttons -->
+        <button id="loginBtn" class="btn">GET STARTED</button>
+        <button id="logoutBtn" class="btn" style="display: none">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== WELCOME SECTION ===================== -->
+    <div id="welcomeSection">
+      <div class="welcome-content">
+        <h1>Welcome to NotesFlow App!</h1>
+        <p>
+          Organize your thoughts, ideas, and tasks with our simple and intuitive
+          note-taking app.
+        </p>
+        <p>Log in to get started or sign up if you're new here.</p>
+      </div>
+    </div>
+
+    <!-- ===================== LOGIN MODAL ===================== -->
+    <div id="loginModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Login to Access Notes</h2>
+
+        <!-- Authentication Forms -->
+        <div id="authForm">
+          <!-- Login Form -->
+          <form id="loginForm">
+            <input
+              type="email"
+              id="loginEmail"
+              autocomplete="off"
+              placeholder="Enter your email"
+              required
+            />
+            <br /><br />
+
+            <div class="password-container">
+              <input
+                type="password"
+                id="loginPassword"
+                autocomplete="off"
+                placeholder="Enter your password"
+                required
+              />
+              <span id="togglePassword" class="fas fa-eye"></span>
+            </div>
+
+            <div id="forget-div">
+              <a href="forget_password.html" id="forgot-password"
+                >Forgot Password?</a
+              >
+            </div>
+
+            <button type="submit" class="btn">LOG IN</button>
+          </form>
+
+          <p>
+            Don't have an account?
+            <a href="javascript:void(0);" id="signupLink">Sign Up</a>
+          </p>
+        </div>
+
+        <!-- Signup Form (Initially Hidden) -->
+        <div id="signupForm" style="display: none">
+          <form id="registerForm">
+            <input
+              type="text"
+              id="signupUsername"
+              autocomplete="off"
+              placeholder="Enter your username"
+              required
+            />
+            <br /><br />
+
+            <input
+              type="email"
+              id="signupEmail"
+              autocomplete="off"
+              placeholder="Enter your email"
+              required
+            />
+            <br /><br />
+
+            <div class="password-container">
+              <input
+                type="password"
+                id="signupPassword"
+                autocomplete="off"
+                placeholder="Enter your password"
+                required
+              />
+              <span id="toggleSignupPassword" class="fas fa-eye"></span>
+            </div>
+
+            <button type="submit" class="btn">Sign Up</button>
+          </form>
+
+          <p>
+            Already have an account?
+            <a href="javascript:void(0);" id="loginLink">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div id="main">
+      <div id="notesContainer"></div>
+    </div>
+
+    <!-- ===================== DETAILED NOTE VIEW ===================== -->
+    <div id="detailedNoteView" class="modal">
+      <div class="modal-content">
+        <span class="close-detail">&times;</span>
+        <h2 id="detailTitle"></h2>
+        <p id="detailContent"></p>
+        <div id="detailDateTime"></div>
+      </div>
+    </div>
+
+    <!-- ===================== SCROLL TO TOP BUTTON ===================== -->
+    <button id="scrollToTopBtn" title="Go to top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="footer">
+      <div class="footer-content">
+        <p>&copy; 2025 NotesFlow. All rights reserved.</p>
+        <p>
+          Contact us at:
+          <a id="contact-link" href="mailto:info.support@notesflow.com"
+            >info.support@notesflow.com</a
+          >
+        </p>
+      </div>
+    </footer>
+
+    <!-- ===================== SCRIPTS ===================== -->
+    <script type="module" src="index.js"></script>
+
+    <!-- Live Reload Script -->
+    <script>
+      if ("WebSocket" in window) {
+        (function () {
+          function refreshCSS() {
+            var sheets = [].slice.call(document.getElementsByTagName("link"));
+            var head = document.getElementsByTagName("head")[0];
+
+            for (var i = 0; i < sheets.length; ++i) {
+              var elem = sheets[i];
+              var parent = elem.parentElement || head;
+              parent.removeChild(elem);
+
+              var rel = elem.rel;
+              if (
+                (elem.href && typeof rel != "string") ||
+                rel.length == 0 ||
+                rel.toLowerCase() == "stylesheet"
+              ) {
+                var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, "");
+                elem.href =
+                  url +
+                  (url.indexOf("?") >= 0 ? "&" : "?") +
+                  "_cacheOverride=" +
+                  new Date().valueOf();
+              }
+              parent.appendChild(elem);
+            }
+          }
+
+          var protocol =
+            window.location.protocol === "http:" ? "ws://" : "wss://";
+          var address =
+            protocol + window.location.host + window.location.pathname + "/ws";
+          var socket = new WebSocket(address);
+
+          socket.onmessage = function (msg) {
+            if (msg.data == "reload") window.location.reload();
+            else if (msg.data == "refreshcss") refreshCSS();
+          };
+
+          if (
+            sessionStorage &&
+            !sessionStorage.getItem("IsThisFirstTime_Log_From_LiveServer")
+          ) {
+            console.log("Live reload enabled.");
+            sessionStorage.setItem("IsThisFirstTime_Log_From_LiveServer", true);
+          }
+        })();
+      } else {
+        console.error(
+          "Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading."
+        );
+      }
+    </script>
+  </body>
+</html>
