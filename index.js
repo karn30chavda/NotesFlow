@@ -235,21 +235,25 @@ function addNoteListeners(noteElement) {
   const deleteBtn = noteElement.querySelector(".delete");
   const lockIcon = noteElement.querySelector(".fa-lock");
   const title = noteElement.querySelector(".title-div textarea");
-  const content = noteElement.querySelector(".content-textarea");
+  const content = noteElement.querySelector(
+    "textarea:not(.title-div textarea)"
+  );
 
-  // Edit button
+  // Edit button functionality
   editBtn?.addEventListener("click", () => {
+    // FIX: Prevent editing locked notes
     if (lockIcon.classList.contains("locked")) {
       alert("Note is locked. Unlock to edit.");
       return;
     }
+
     title.readOnly = false;
     content.readOnly = false;
     saveBtn.style.display = "block";
     editBtn.style.display = "none";
   });
 
-  // Lock/Unlock
+  // Lock/Unlock functionality
   lockIcon.addEventListener("click", async () => {
     const noteId = noteElement.getAttribute("data-id");
     const isLocked = noteElement.classList.contains("locked-note");
@@ -259,22 +263,23 @@ function addNoteListeners(noteElement) {
       if (pin && pin.length === 4 && !isNaN(pin)) {
         await toggleNoteLock(noteId, true, pin);
         noteElement.classList.add("locked-note");
-
-        title.readOnly = true;
-        content.readOnly = true;
-        content.style.filter = "blur(5px)";
+        noteElement.querySelectorAll("textarea").forEach((t) => {
+          t.readOnly = true;
+          t.style.filter = "blur(5px)";
+        });
         lockIcon.classList.add("locked");
       }
     } else {
       const noteDoc = await getDoc(doc(db, "notes", noteId));
       const enteredPin = prompt("Enter PIN to unlock:");
+
       if (enteredPin === noteDoc.data().pin) {
         await toggleNoteLock(noteId, false);
         noteElement.classList.remove("locked-note");
-
-        title.readOnly = false;
-        content.readOnly = false;
-        content.style.filter = "none";
+        noteElement.querySelectorAll("textarea").forEach((t) => {
+          t.readOnly = false;
+          t.style.filter = "none";
+        });
         lockIcon.classList.remove("locked");
       } else {
         alert("Incorrect PIN!");
@@ -282,7 +287,7 @@ function addNoteListeners(noteElement) {
     }
   });
 
-  // Delete
+  // Delete Note
   deleteBtn.addEventListener("click", async () => {
     const isLocked = lockIcon.classList.contains("locked");
     let proceed = false;
@@ -311,7 +316,7 @@ function addNoteListeners(noteElement) {
     }
   });
 
-  // Save
+  // Save Note
   saveBtn.addEventListener("click", async () => {
     if (lockIcon.classList.contains("locked")) {
       alert("Unlock note before saving");
@@ -319,6 +324,7 @@ function addNoteListeners(noteElement) {
     }
 
     const noteId = noteElement.getAttribute("data-id");
+
     if (noteId) {
       await setDoc(
         doc(db, "notes", noteId),
@@ -335,6 +341,7 @@ function addNoteListeners(noteElement) {
       await saveNoteToFirestore(title.value, content.value);
     }
 
+    // FIX: Refresh notes after save
     await loadUserNotes();
   });
 }
@@ -526,6 +533,12 @@ loginForm.addEventListener("submit", async (e) => {
 });
 
 logoutBtn.addEventListener("click", async () => {
+  const confirmLogout = confirm("Do you really want to logout?");
+
+  if (!confirmLogout) {
+    return; // user clicked "Cancel"
+  }
+
   try {
     await signOut(auth);
     alert("You've been logged out");
