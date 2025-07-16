@@ -91,7 +91,7 @@ Use a live server extension or lite-server to launch the app.
 
 🌐 Live Demo
 
-🔗 Try it here(https://notesflowapp.netlify.app)
+🔗 Netlify: https://notesflowapp.netlify.app
 
 
 ---
