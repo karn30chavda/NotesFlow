@@ -219,9 +219,10 @@ function renderNote(noteData) {
 
   // Add blur effect to locked notes
   if (isLocked) {
-    note.querySelectorAll("textarea").forEach((textarea) => {
-      textarea.style.filter = "blur(5px)";
-    });
+    const contentTextarea = note.querySelector(".content-textarea");
+    if (contentTextarea) {
+      contentTextarea.style.filter = "blur(5px)";
+    }
   }
 
   addNoteListeners(note);
@@ -234,25 +235,21 @@ function addNoteListeners(noteElement) {
   const deleteBtn = noteElement.querySelector(".delete");
   const lockIcon = noteElement.querySelector(".fa-lock");
   const title = noteElement.querySelector(".title-div textarea");
-  const content = noteElement.querySelector(
-    "textarea:not(.title-div textarea)"
-  );
+  const content = noteElement.querySelector(".content-textarea");
 
-  // Edit button functionality
+  // Edit button
   editBtn?.addEventListener("click", () => {
-    // FIX: Prevent editing locked notes
     if (lockIcon.classList.contains("locked")) {
       alert("Note is locked. Unlock to edit.");
       return;
     }
-
     title.readOnly = false;
     content.readOnly = false;
     saveBtn.style.display = "block";
     editBtn.style.display = "none";
   });
 
-  // Lock/Unlock functionality
+  // Lock/Unlock
   lockIcon.addEventListener("click", async () => {
     const noteId = noteElement.getAttribute("data-id");
     const isLocked = noteElement.classList.contains("locked-note");
@@ -262,23 +259,22 @@ function addNoteListeners(noteElement) {
       if (pin && pin.length === 4 && !isNaN(pin)) {
         await toggleNoteLock(noteId, true, pin);
         noteElement.classList.add("locked-note");
-        noteElement.querySelectorAll("textarea").forEach((t) => {
-          t.readOnly = true;
-          t.style.filter = "blur(5px)";
-        });
+
+        title.readOnly = true;
+        content.readOnly = true;
+        content.style.filter = "blur(5px)";
         lockIcon.classList.add("locked");
       }
     } else {
       const noteDoc = await getDoc(doc(db, "notes", noteId));
       const enteredPin = prompt("Enter PIN to unlock:");
-
       if (enteredPin === noteDoc.data().pin) {
         await toggleNoteLock(noteId, false);
         noteElement.classList.remove("locked-note");
-        noteElement.querySelectorAll("textarea").forEach((t) => {
-          t.readOnly = false;
-          t.style.filter = "none";
-        });
+
+        title.readOnly = false;
+        content.readOnly = false;
+        content.style.filter = "none";
         lockIcon.classList.remove("locked");
       } else {
         alert("Incorrect PIN!");
@@ -286,7 +282,7 @@ function addNoteListeners(noteElement) {
     }
   });
 
-  // Delete Note
+  // Delete
   deleteBtn.addEventListener("click", async () => {
     const isLocked = lockIcon.classList.contains("locked");
     let proceed = false;
@@ -315,7 +311,7 @@ function addNoteListeners(noteElement) {
     }
   });
 
-  // Save Note
+  // Save
   saveBtn.addEventListener("click", async () => {
     if (lockIcon.classList.contains("locked")) {
       alert("Unlock note before saving");
@@ -323,7 +319,6 @@ function addNoteListeners(noteElement) {
     }
 
     const noteId = noteElement.getAttribute("data-id");
-
     if (noteId) {
       await setDoc(
         doc(db, "notes", noteId),
@@ -340,7 +335,6 @@ function addNoteListeners(noteElement) {
       await saveNoteToFirestore(title.value, content.value);
     }
 
-    // FIX: Refresh notes after save
     await loadUserNotes();
   });
 }
